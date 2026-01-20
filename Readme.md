@@ -22,6 +22,7 @@ open http://localhost:8080
 ## Anpassung
 - In den HTML Dateien die API URL anpassen.
 - Die docker-compose.yml anpassen
+- "index.highlight.max_analyzed_offset": 10000000 im OpenSearchDashboard setzen
 
 ## Dokumentation
 
