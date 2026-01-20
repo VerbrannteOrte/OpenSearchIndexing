@@ -19,9 +19,9 @@ Vollständiges Dokumenten-Indexierungs-System mit:
 ./Scripts/start.sh
 open http://localhost:8080
 ```
-## Anpassung
-- In den HTML Dateien die API URL anpassen.
-- Die docker-compose.yml anpassen
+## Muss angepasst werden
+- In den HTML Dateien und search_api.py API URL anpassen und localhost ersetzen.
+- docker-compose.yml anpassen
 - "index.highlight.max_analyzed_offset": 10000000 im OpenSearchDashboard setzen
 - "index.mapping.total_fields.limit": "1500" im OpenSearchDashboard setzen
 
