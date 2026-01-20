@@ -23,6 +23,7 @@ open http://localhost:8080
 - In den HTML Dateien die API URL anpassen.
 - Die docker-compose.yml anpassen
 - "index.highlight.max_analyzed_offset": 10000000 im OpenSearchDashboard setzen
+- "index.mapping.total_fields.limit": "1500" im OpenSearchDashboard setzen
 
 ## Dokumentation
 
@@ -33,3 +34,7 @@ open http://localhost:8080
 ## Lizenz
 
 MIT
+
+## ToDo
+- OpenSearch IndexSettings im Docker übergeben.
+- URLS per Variablen konfigurieren.
