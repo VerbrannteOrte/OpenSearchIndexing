@@ -31,7 +31,7 @@ def search():
     """Volltextsuche über alle Indizes mit dynamischen Facetten"""
     query = request.args.get('q', '')
     size = int(request.args.get('size', 10))
-    index = request.args.get('index', 'documents,web_pages')
+    index = request.args.get('index', 'documents', 'web_pages')
     
     if not query:
         return jsonify({'error': 'Query parameter "q" required'}), 400
