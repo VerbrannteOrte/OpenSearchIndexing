@@ -53,15 +53,15 @@ def search():
                 "fuzziness": "AUTO"
             }
         },
-        "highlight": {
-            "fields": {
-                "content": {"fragment_size": 150, "number_of_fragments": 3},
-                "title": {},
-                "description": {}
-            },
-            "pre_tags": ["<mark>"],
-            "post_tags": ["</mark>"]
-        },
+#        "highlight": {
+#            "fields": {
+#                "content": {"fragment_size": 150, "number_of_fragments": 3},
+#                "title": {},
+#                "description": {}
+#            },
+#            "pre_tags": ["<mark>"],
+#            "post_tags": ["</mark>"]
+#        },
         "aggs": aggregations,
         "size": size
     }
