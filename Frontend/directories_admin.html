@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Indexierungs-Verzeichnisse</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .nav-tab:hover,
+        .nav-tab.active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .directories-list {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .directory-item {
+            padding: 20px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .directory-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .directory-item.disabled {
+            opacity: 0.5;
+            background: #f9f9f9;
+        }
+
+        .directory-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .directory-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .directory-path {
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .directory-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-weight: 500;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 5px;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .directory-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .toggle {
+            width: 50px;
+            height: 26px;
+            background: #ccc;
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle.active {
+            background: #4CAF50;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+
+        .toggle.active::after {
+            left: 26px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .file-type-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .chip {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .chip:hover,
+        .chip.selected {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            border-left: 4px solid #4CAF50;
+        }
+
+        .notification.error {
+            border-left: 4px solid #f44336;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📁 Indexierungs-Verzeichnisse</h1>
+            <p>Konfigurieren Sie Verzeichnisse für die Dokumenten-Indexierung</p>
+            <div class="nav-tabs">
+                <button class="nav-tab" onclick="window.location.href='admin.html'">Facetten</button>
+                <button class="nav-tab active">Verzeichnisse</button>
+                <button class="nav-tab" onclick="window.location.href='index.html'">Suche</button>
+            </div>
+        </header>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="showAddDirectoryModal()">
+                ➕ Verzeichnis hinzufügen
+            </button>
+            <button class="btn btn-success" onclick="triggerIndexing()">
+                🔄 Neu indexieren
+            </button>
+            <button class="btn btn-secondary" onclick="showSupportedTypes()">
+                ℹ️ Unterstützte Dateitypen
+            </button>
+        </div>
+
+        <div class="directories-list" id="directoriesList">
+            <p style="text-align: center; color: #999;">Lade Verzeichnisse...</p>
+        </div>
+    </div>
+
+    <!-- Add Directory Modal -->
+    <div class="modal" id="addDirectoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Verzeichnis hinzufügen</h2>
+                <span class="close-modal" onclick="closeModal('addDirectoryModal')">&times;</span>
+            </div>
+            
+            <form onsubmit="addDirectory(event)">
+                <div class="form-group">
+                    <label>ID *</label>
+                    <input type="text" id="dirId" required>
+                    <small>Eindeutige ID (z.B. 'documents', 'scans')</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Pfad *</label>
+                    <input type="text" id="dirPath" required placeholder="/pfad/zum/verzeichnis">
+                    <small>Absoluter Pfad zum Verzeichnis</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Beschreibung</label>
+                    <input type="text" id="dirDescription" placeholder="Beschreibung des Verzeichnisses">
+                </div>
+
+                <div class="form-group">
+                    <label>Dateitypen</label>
+                    <div class="file-type-chips">
+                        <div class="chip selected" data-type="all" onclick="toggleFileType(this, 'all')">📄 Alle</div>
+                        <div class="chip" data-type="microsoft_office" onclick="toggleFileType(this, 'microsoft_office')">📊 MS Office</div>
+                        <div class="chip" data-type="libreoffice" onclick="toggleFileType(this, 'libreoffice')">📝 LibreOffice</div>
+                        <div class="chip" data-type="pdf" onclick="toggleFileType(this, 'pdf')">📕 PDF</div>
+                        <div class="chip" data-type="images" onclick="toggleFileType(this, 'images')">🖼️ Bilder</div>
+                        <div class="chip" data-type="text" onclick="toggleFileType(this, 'text')">📃 Text</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="dirRecursive" checked>
+                        <label for="dirRecursive">Rekursiv (Unterverzeichnisse einbeziehen)</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="dirWatch">
+                        <label for="dirWatch">Überwachen (auf neue Dateien achten)</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ausschlussmuster (optional)</label>
+                    <textarea id="dirExclude" rows="3" placeholder="*.tmp
+*.bak
+.git/*"></textarea>
+                    <small>Ein Muster pro Zeile (z.B. *.tmp, .git/*)</small>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Hinzufügen</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addDirectoryModal')">Abbrechen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+        let selectedFileTypes = ['all'];
+
+        async function loadDirectories() {
+            try {
+                const response = await fetch(`${API_URL}/admin/directories`);
+                const data = await response.json();
+                
+                displayDirectories(data.directories);
+            } catch (error) {
+                console.error('Fehler:', error);
+                showNotification('Fehler beim Laden der Verzeichnisse', 'error');
+            }
+        }
+
+        function displayDirectories(directories) {
+            const list = document.getElementById('directoriesList');
+            
+            if (directories.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #999;">Noch keine Verzeichnisse konfiguriert</p>';
+                return;
+            }
+
+            let html = '';
+            directories.forEach(dir => {
+                const isEnabled = dir.enabled !== false;
+                html += `
+                    <div class="directory-item ${!isEnabled ? 'disabled' : ''}">
+                        <div class="directory-header">
+                            <div>
+                                <div class="directory-title">
+                                    ${dir.description || dir.id}
+                                    ${dir.watch ? '<span class="badge badge-info">👁️ Überwacht</span>' : ''}
+                                    ${dir.recursive ? '<span class="badge badge-success">↻ Rekursiv</span>' : ''}
+                                </div>
+                                <div class="directory-path">${dir.path}</div>
+                            </div>
+                            <div class="directory-actions">
+                                <div class="toggle ${isEnabled ? 'active' : ''}" 
+                                     onclick="toggleDirectory('${dir.id}', ${!isEnabled})">
+                                </div>
+                                <button class="btn btn-danger" onclick="deleteDirectory('${dir.id}')">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="directory-info">
+                            <div class="info-item">
+                                <div class="info-label">Dateitypen</div>
+                                <div class="info-value">${dir.file_types.join(', ')}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Ausschlüsse</div>
+                                <div class="info-value">${dir.exclude_patterns.length || 'Keine'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+        }
+
+        async function addDirectory(event) {
+            event.preventDefault();
+
+            const excludeText = document.getElementById('dirExclude').value;
+            const excludePatterns = excludeText 
+                ? excludeText.split('\n').map(p => p.trim()).filter(p => p)
+                : [];
+
+            const directory = {
+                id: document.getElementById('dirId').value,
+                path: document.getElementById('dirPath').value,
+                description: document.getElementById('dirDescription').value,
+                enabled: true,
+                recursive: document.getElementById('dirRecursive').checked,
+                watch: document.getElementById('dirWatch').checked,
+                file_types: selectedFileTypes,
+                exclude_patterns: excludePatterns
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/admin/directories`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(directory)
+                });
+
+                if (response.ok) {
+                    showNotification('Verzeichnis hinzugefügt', 'success');
+                    closeModal('addDirectoryModal');
+                    loadDirectories();
+                    document.querySelector('#addDirectoryModal form').reset();
+                    selectedFileTypes = ['all'];
+                } else {
+                    const error = await response.json();
+                    showNotification(error.error || 'Fehler beim Hinzufügen', 'error');
+                }
+            } catch (error) {
+                console.error('Fehler:', error);
+                showNotification('Fehler beim Hinzufügen', 'error');
+            }
+        }
+
+        async function toggleDirectory(dirId, enabled) {
+            try {
+                const response = await fetch(`${API_URL}/admin/directories/${dirId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({enabled: enabled})
+                });
+
+                if (response.ok) {
+                    showNotification(`Verzeichnis ${enabled ? 'aktiviert' : 'deaktiviert'}`, 'success');
+                    loadDirectories();
+                }
+            } catch (error) {
+                console.error('Fehler:', error);
+                showNotification('Fehler beim Aktualisieren', 'error');
+            }
+        }
+
+        async function deleteDirectory(dirId) {
+            if (!confirm('Verzeichnis wirklich entfernen?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/directories/${dirId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showNotification('Verzeichnis entfernt', 'success');
+                    loadDirectories();
+                }
+            } catch (error) {
+                console.error('Fehler:', error);
+                showNotification('Fehler beim Löschen', 'error');
+            }
+        }
+
+        async function triggerIndexing() {
+            if (!confirm('Alle konfigurierten Verzeichnisse neu indexieren? Dies kann einige Zeit dauern.')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/trigger-indexing`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    showNotification('Indexierung gestartet. Prüfen Sie die Logs.', 'success');
+                }
+            } catch (error) {
+                console.error('Fehler:', error);
+                showNotification('Fehler beim Starten der Indexierung', 'error');
+            }
+        }
+
+        async function showSupportedTypes() {
+            try {
+                const response = await fetch(`${API_URL}/admin/supported-file-types`);
+                const data = await response.json();
+                
+                let message = 'Unterstützte Dateitypen:\n\n';
+                for (const [category, extensions] of Object.entries(data.file_types)) {
+                    message += `${category}:\n  ${extensions.join(', ')}\n\n`;
+                }
+                
+                alert(message);
+            } catch (error) {
+                console.error('Fehler:', error);
+            }
+        }
+
+        function toggleFileType(element, type) {
+            if (type === 'all') {
+                selectedFileTypes = ['all'];
+                document.querySelectorAll('.chip').forEach(chip => {
+                    chip.classList.remove('selected');
+                });
+                element.classList.add('selected');
+            } else {
+                // Remove 'all' if specific type is selected
+                selectedFileTypes = selectedFileTypes.filter(t => t !== 'all');
+                document.querySelector('.chip[data-type="all"]').classList.remove('selected');
+                
+                if (element.classList.contains('selected')) {
+                    element.classList.remove('selected');
+                    selectedFileTypes = selectedFileTypes.filter(t => t !== type);
+                } else {
+                    element.classList.add('selected');
+                    selectedFileTypes.push(type);
+                }
+                
+                // If no types selected, select 'all'
+                if (selectedFileTypes.length === 0) {
+                    selectedFileTypes = ['all'];
+                    document.querySelector('.chip[data-type="all"]').classList.add('selected');
+                }
+            }
+        }
+
+        function showAddDirectoryModal() {
+            document.getElementById('addDirectoryModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        loadDirectories();
+    </script>
+</body>
+</html>

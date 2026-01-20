@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.11.1
+    container_name: opensearch
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node1
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=Admin123!
+      - plugins.security.disabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+      - ./pipelines:/usr/share/opensearch/config/pipelines
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    networks:
+      - opensearch-net
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.11.1
+    container_name: opensearch-dashboards
+    ports:
+      - "5601:5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
+      OPENSEARCH_USERNAME: admin
+      OPENSEARCH_PASSWORD: Admin123!
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch
+
+  tika:
+    image: apache/tika:2.9.1.0
+    container_name: tika
+    ports:
+      - "9998:9998"
+    networks:
+      - opensearch-net
+
+  indexer:
+    build:
+      context: .
+      dockerfile: Dockerfile.indexer
+    container_name: indexer
+    environment:
+      - OPENSEARCH_URL=https://opensearch:9200
+      - OPENSEARCH_USER=admin
+      - OPENSEARCH_PASSWORD=Admin123!
+      - TIKA_URL=http://tika:9998
+      - MAX_PAGES_PER_SITE=50
+      - OCR_USE_GPU=false
+      - OCR_ENABLE_SUETTERLIN=true
+    volumes:
+      - ./Backend:/app
+      - ./Data/documents:/data
+      - ./Data/watch:/watch
+      - ./Data/ontologies:/ontologies
+      - ./Data/config:/config
+      - ./Data/models:/models
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch
+      - tika
+
+  search-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: search-api
+    ports:
+      - "5000:5000"
+    environment:
+      - OPENSEARCH_URL=https://opensearch:9200
+      - OPENSEARCH_USER=admin
+      - OPENSEARCH_PASSWORD=Admin123!
+    volumes:
+      - ./Backend:/app
+      - ./Data/config:/config
+      - ./Data/ontologies:/ontologies
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch
+
+  search-ui:
+    image: nginx:alpine
+    container_name: search-ui
+    ports:
+      - "8080:80"
+    volumes:
+      - ./Frontend:/usr/share/nginx/html:ro
+    networks:
+      - opensearch-net
+
+volumes:
+  opensearch-data:
+
+networks:
+  opensearch-net:
+    driver: bridge

@@ -1,0 +1,33 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    tesseract-ocr-deu \
+    tesseract-ocr-eng \
+    tesseract-ocr-fra \
+    tesseract-ocr-spa \
+    tesseract-ocr-ita \
+    tesseract-ocr-deu-frak \
+    poppler-utils \
+    libpoppler-cpp-dev \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    curl \
+    libreoffice \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /models/easyocr /tmp/ocr_cache
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+ENV OCR_USE_GPU=false
+ENV OCR_ENABLE_SUETTERLIN=true
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+
+CMD ["python", "-u", "indexer.py"]
