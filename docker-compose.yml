@@ -34,9 +34,9 @@ services:
     ports:
       - "5601:5601"
     environment:
-      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
+      OPENSEARCH_HOSTS: "https://opensearch:9200"
       OPENSEARCH_USERNAME: admin
-      OPENSEARCH_PASSWORD: Admin123!
+      OPENSEARCH_PASSWORD: admin
     networks:
       - opensearch-net
     depends_on:
@@ -58,7 +58,7 @@ services:
     environment:
       - OPENSEARCH_URL=https://opensearch:9200
       - OPENSEARCH_USER=admin
-      - OPENSEARCH_PASSWORD=Admin123!
+      - OPENSEARCH_PASSWORD=admin
       - TIKA_URL=http://tika:9998
       - MAX_PAGES_PER_SITE=50
       - OCR_USE_GPU=false
@@ -86,7 +86,7 @@ services:
     environment:
       - OPENSEARCH_URL=https://opensearch:9200
       - OPENSEARCH_USER=admin
-      - OPENSEARCH_PASSWORD=Admin123!
+      - OPENSEARCH_PASSWORD=admin
     volumes:
       - ./Backend:/app
       - ./Data/config:/config
