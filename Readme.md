@@ -1,3 +1,4 @@
+# Beware: untested AI coded Project !! 
 # OpenSearch Document Indexing System
 
 Vollständiges Dokumenten-Indexierungs-System mit:
