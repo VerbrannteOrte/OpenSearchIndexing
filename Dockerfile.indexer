@@ -9,10 +9,10 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr-fra \
     tesseract-ocr-spa \
     tesseract-ocr-ita \
-    tesseract-ocr-deu-frak \
+    tesseract-ocr-deu-frk \
     poppler-utils \
     libpoppler-cpp-dev \
-    libgl1-mesa-glx \
+    glx-alternative-mesa \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
