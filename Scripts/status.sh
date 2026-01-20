@@ -5,7 +5,7 @@ echo "Service Status"
 echo "=========================================="
 echo ""
 
-docker-compose ps
+docker compose ps
 
 echo ""
 echo "Disk Usage:"

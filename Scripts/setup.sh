@@ -104,7 +104,7 @@ echo ""
 # Docker Images bauen
 echo "Building Docker images..."
 echo "Dies kann einige Minuten dauern..."
-docker-compose build
+docker compose build
 
 echo ""
 echo "=========================================="

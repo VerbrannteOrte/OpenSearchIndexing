@@ -17,7 +17,7 @@ if ! docker info > /dev/null 2>&1; then
 fi
 
 # Services starten
-docker-compose up -d
+docker compose up -d
 
 echo ""
 echo "Services werden gestartet..."
@@ -41,7 +41,7 @@ echo "  - Username: admin"
 echo "  - Password: Admin123!"
 echo ""
 echo "Logs anzeigen:"
-echo "  docker-compose logs -f"
+echo "  docker compose logs -f"
 echo ""
 echo "Stoppen:"
 echo "  ./Scripts/stop.sh"

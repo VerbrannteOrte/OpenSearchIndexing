@@ -25,7 +25,7 @@ cp .env "$BACKUP_DIR/" 2>/dev/null || true
 
 # Index-Liste exportieren
 echo "Exportiere Index-Liste..."
-docker-compose exec -T opensearch curl -s -k -u admin:Admin123! \
+docker compose exec -T opensearch curl -s -k -u admin:Admin123! \
   "https://localhost:9200/_cat/indices?v" > "$BACKUP_DIR/indices.txt" 2>/dev/null || true
 
 echo ""

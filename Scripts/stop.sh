@@ -4,7 +4,7 @@
 #!/bin/bash
 
 echo "Stoppe Services..."
-docker-compose down
+docker compose down
 
 echo ""
 echo "✓ Alle Services gestoppt"
