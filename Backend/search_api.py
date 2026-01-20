@@ -18,7 +18,7 @@ client = OpenSearch(
     hosts=[os.getenv('OPENSEARCH_URL', 'https://localhost:9200')],
     http_auth=(
         os.getenv('OPENSEARCH_USER', 'admin'),
-        os.getenv('OPENSEARCH_PASSWORD', 'Admin123!')
+        os.getenv('OPENSEARCH_PASSWORD', 'admin')
     ),
     use_ssl=True,
     verify_certs=False,
