@@ -38,3 +38,5 @@ MIT
 ## ToDo
 - OpenSearch IndexSettings im Docker übergeben.
 - URLS per Variablen konfigurieren.
+- Nächste Seite im Search_ui hinzufügen
+- Direkte Ansicht der Dokumente
