@@ -19,6 +19,9 @@ Vollständiges Dokumenten-Indexierungs-System mit:
 ./Scripts/start.sh
 open http://localhost:8080
 ```
+## Anpassung
+- In den HTML Dateien die API URL anpassen.
+- Die docker-compose.yml anpassen
 
 ## Dokumentation
 
