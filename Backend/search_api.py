@@ -18,7 +18,7 @@ client = OpenSearch(
     hosts=[os.getenv('OPENSEARCH_URL', 'https://localhost:9200')],
     http_auth=(
         os.getenv('OPENSEARCH_USER', 'admin'),
-        os.getenv('OPENSEARCH_PASSWORD', 'Admin123!')
+        os.getenv('OPENSEARCH_PASSWORD', 'admin')
     ),
     use_ssl=True,
     verify_certs=False,
@@ -31,7 +31,7 @@ def search():
     """Volltextsuche über alle Indizes mit dynamischen Facetten"""
     query = request.args.get('q', '')
     size = int(request.args.get('size', 10))
-    index = request.args.get('index', 'documents,web_pages')
+    index = request.args.get('index', 'documents', 'web_pages')
     
     if not query:
         return jsonify({'error': 'Query parameter "q" required'}), 400
