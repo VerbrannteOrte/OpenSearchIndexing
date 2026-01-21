@@ -50,7 +50,7 @@ def search():
                 "query": query,
                 "fields": ["title^3", "content^2", "description", "ocr_text"],
                 "type": "best_fields",
-                "fuzziness": "AUTO"
+                "fuzziness": "2"
             }
         },
 #        "highlight": {
