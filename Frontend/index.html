@@ -145,6 +145,7 @@
             margin-bottom: 8px;
             text-decoration: none;
             display: inline-block;
+            cursor: pointer;
         }
 
         .result-title:hover {
@@ -190,6 +191,57 @@
             margin-bottom: 20px;
             font-size: 14px;
             color: #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding: 20px 0;
+        }
+
+        .pagination-button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .pagination-button:hover:not(:disabled) {
+            background: #5568d3;
+        }
+
+        .pagination-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            padding: 10px 20px;
+            background: white;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-size-selector select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
         .loading {
@@ -218,16 +270,6 @@
         .clear-filters:hover {
             background: #d32f2f;
         }
-
-        .facet-hierarchy {
-            padding-left: 15px;
-            margin-top: 5px;
-        }
-
-        .facet-hierarchy .facet-item {
-            font-size: 13px;
-            color: #666;
-        }
     </style>
 </head>
 <body>
@@ -238,7 +280,7 @@
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Suchbegriff eingeben..." />
                 <button onclick="search()">Suchen</button>
-                <button onclick="window.location.href='admin_ui.html'" style="background: #764ba2; margin-left: 10px;">⚙️ Admin</button>
+                <button onclick="window.location.href='admin.html'" style="background: #764ba2; margin-left: 10px;">⚙️ Admin</button>
             </div>
         </header>
 
@@ -246,51 +288,71 @@
             <aside class="facets">
                 <h2 style="margin-bottom: 20px; font-size: 18px;">Filter</h2>
                 
-                <!-- Dynamische Facetten werden hier geladen -->
                 <div id="dynamicFacets"></div>
 
                 <button class="clear-filters" onclick="clearFilters()">Filter zurücksetzen</button>
             </aside>
 
             <main class="results">
-                <div class="stats" id="stats" style="display: none;"></div>
+                <div class="stats" id="stats" style="display: none;">
+                    <div id="statsText"></div>
+                    <div class="page-size-selector">
+                        <label>Ergebnisse pro Seite:</label>
+                        <select id="pageSizeSelect" onchange="changePageSize()">
+                            <option value="10">10</option>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="searchResults">
                     <div class="no-results">
                         Geben Sie einen Suchbegriff ein, um zu beginnen.
                     </div>
                 </div>
+                <div class="pagination" id="pagination" style="display: none;"></div>
             </main>
         </div>
     </div>
 
     <script>
         let currentFilters = {};
+        let currentPage = 1;
+        let pageSize = 20;
+        let totalResults = 0;
+        let currentQuery = '';
 
-        // API Endpoint - anpassen!
         const API_URL = 'http://localhost:5000';
 
-        // Enter-Taste für Suche
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 search();
             }
         });
 
-        async function search() {
+        async function search(page = 1) {
             const query = document.getElementById('searchInput').value;
             
             if (!query.trim()) {
                 return;
             }
 
+            currentQuery = query;
+            currentPage = page;
+
             showLoading();
 
+            const from = (page - 1) * pageSize;
+
             try {
-                const response = await fetch(`${API_URL}/search?q=${encodeURIComponent(query)}&size=20`);
+                const response = await fetch(`${API_URL}/search?q=${encodeURIComponent(query)}&size=${pageSize}&from=${from}`);
                 const data = await response.json();
 
+                totalResults = data.total;
                 displayResults(data);
                 updateFacets(data);
+                updatePagination();
             } catch (error) {
                 console.error('Fehler bei der Suche:', error);
                 document.getElementById('searchResults').innerHTML = 
@@ -301,32 +363,34 @@
         function showLoading() {
             document.getElementById('searchResults').innerHTML = 
                 '<div class="loading">Suche läuft...</div>';
+            document.getElementById('pagination').style.display = 'none';
         }
 
         function displayResults(data) {
             const resultsDiv = document.getElementById('searchResults');
             const statsDiv = document.getElementById('stats');
+            const statsText = document.getElementById('statsText');
 
             if (!data.results || data.results.length === 0) {
                 resultsDiv.innerHTML = '<div class="no-results">Keine Ergebnisse gefunden.</div>';
                 statsDiv.style.display = 'none';
+                document.getElementById('pagination').style.display = 'none';
                 return;
             }
 
-            // Statistik anzeigen
-            statsDiv.style.display = 'block';
-            statsDiv.innerHTML = `
-                Gefunden: <strong>${data.total}</strong> Dokumente 
+            statsDiv.style.display = 'flex';
+            const startResult = (currentPage - 1) * pageSize + 1;
+            const endResult = Math.min(currentPage * pageSize, totalResults);
+            statsText.innerHTML = `
+                Zeige <strong>${startResult}-${endResult}</strong> von <strong>${totalResults}</strong> Dokumenten 
                 (${data.took}ms)
             `;
 
-            // Ergebnisse rendern
             let html = '';
             data.results.forEach(result => {
                 const source = result.source;
                 const highlights = result.highlights;
 
-                // Snippet erstellen
                 let snippet = '';
                 if (highlights && highlights.content) {
                     snippet = highlights.content.join(' ... ');
@@ -334,7 +398,6 @@
                     snippet = source.content.substring(0, 300) + '...';
                 }
 
-                // Konzepte
                 let conceptsHtml = '';
                 if (source.concepts && source.concepts.length > 0) {
                     conceptsHtml = '<div class="result-concepts">';
@@ -344,7 +407,6 @@
                     conceptsHtml += '</div>';
                 }
 
-                // Meta-Informationen
                 const fileSize = source.file_size ? 
                     (source.file_size / 1024).toFixed(1) + ' KB' : '';
                 const date = source.modified_date ? 
@@ -352,9 +414,9 @@
 
                 html += `
                     <div class="result-item">
-                        <a href="#" class="result-title" onclick="openDocument('${source.file_path || source.url}'); return false;">
+                        <div class="result-title" onclick="openDocument('${source.file_path || source.url}', '${source.file_name || source.title}')">
                             ${source.title}
-                        </a>
+                        </div>
                         <div class="result-meta">
                             ${source.document_type || source.mime_type || ''} 
                             ${fileSize ? '• ' + fileSize : ''} 
@@ -370,13 +432,52 @@
             resultsDiv.innerHTML = html;
         }
 
+        function updatePagination() {
+            const paginationDiv = document.getElementById('pagination');
+            
+            if (totalResults <= pageSize) {
+                paginationDiv.style.display = 'none';
+                return;
+            }
+
+            const totalPages = Math.ceil(totalResults / pageSize);
+            paginationDiv.style.display = 'flex';
+
+            let html = `
+                <button class="pagination-button" onclick="search(1)" ${currentPage === 1 ? 'disabled' : ''}>
+                    ⏮ Erste
+                </button>
+                <button class="pagination-button" onclick="search(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    ← Zurück
+                </button>
+                <div class="pagination-info">
+                    Seite ${currentPage} von ${totalPages}
+                </div>
+                <button class="pagination-button" onclick="search(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    Weiter →
+                </button>
+                <button class="pagination-button" onclick="search(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    Letzte ⏭
+                </button>
+            `;
+
+            paginationDiv.innerHTML = html;
+        }
+
+        function changePageSize() {
+            pageSize = parseInt(document.getElementById('pageSizeSelect').value);
+            currentPage = 1;
+            if (currentQuery) {
+                search(1);
+            }
+        }
+
         function updateFacets(data) {
             if (!data.facets) return;
 
             const container = document.getElementById('dynamicFacets');
             let html = '';
 
-            // Facetten in der Reihenfolge rendern
             for (const [facetId, facetData] of Object.entries(data.facets)) {
                 if (!facetData.buckets || facetData.buckets.length === 0) continue;
 
@@ -423,24 +524,23 @@
                 currentFilters[filterKey].push(value);
             }
             
-            // Suche mit aktiven Filtern neu ausführen
-            search();
+            currentPage = 1;
+            search(1);
         }
 
         function clearFilters() {
             currentFilters = {};
             
-            // Alle Checkboxen deaktivieren
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                 cb.checked = false;
             });
             
-            // Suche neu ausführen
-            search();
+            currentPage = 1;
+            search(1);
         }
 
-        function openDocument(path) {
-            alert(`Dokument öffnen: ${path}\n\nHier würden Sie das Dokument öffnen oder herunterladen.`);
+        function openDocument(path, filename) {
+            alert(`Dokument öffnen: ${filename}\n\nPfad: ${path}\n\nIn Version 2 können Sie das Dokument direkt betrachten.`);
         }
     </script>
 </body>
